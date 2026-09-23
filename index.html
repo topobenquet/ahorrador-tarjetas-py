@@ -311,6 +311,78 @@
             padding: 0.5rem 0;
         }
 
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 18px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .comparison-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .bank-comparison {
+            background: var(--gray-50);
+            border-radius: 14px;
+            padding: 1.25rem;
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .bank-comparison.winner {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.05), rgba(52, 199, 89, 0.02));
+            border-color: var(--success);
+            box-shadow: 0 8px 16px rgba(52, 199, 89, 0.15);
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .bank-name-comp {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--gray-900);
+        }
+
+        .winner-badge {
+            font-size: 1.2rem;
+        }
+
+        .percent-large {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .days-info {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .benefit-preview {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
         .card {
             background: white;
             border-radius: 16px;
@@ -515,6 +587,7 @@
 
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('today')">📅 Hoy</button>
+                <button class="tab-btn" onclick="switchTab('comparison')">⚖️ Comparativa</button>
                 <button class="tab-btn" onclick="switchTab('week')">📆 Por semana</button>
                 <button class="tab-btn" onclick="switchTab('categories')">🏷️ Por categoría</button>
                 <button class="tab-btn" onclick="switchTab('calculator')">🧮 Calculadora</button>
@@ -523,6 +596,7 @@
             </div>
 
             <div id="today" class="tab-content active"></div>
+            <div id="comparison" class="tab-content"></div>
             <div id="week" class="tab-content"></div>
             <div id="categories" class="tab-content"></div>
             <div id="calculator" class="tab-content">
@@ -770,6 +844,7 @@
             const userPromos = allPromos.filter(p => Object.keys(userProfile).some(b => p.bank.includes(b)));
 
             renderToday(userPromos);
+            renderComparison(userPromos);
             renderWeek(userPromos);
             renderCategories(userPromos);
             renderSummary(userPromos);
@@ -874,6 +949,71 @@
 
             html += '</div>';
             document.getElementById('today').innerHTML = html;
+        }
+
+        function renderComparison(promos) {
+            // Agrupar por categoría
+            const categories = {};
+            promos.forEach(p => {
+                const cat = p.category || 'Otros';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(p);
+            });
+
+            let html = '<h2 style="margin-bottom: 1.5rem;">⚖️ Mejor opción por categoría</h2>';
+            html += '<div class="comparison-grid">';
+
+            for (const [category, items] of Object.entries(categories)) {
+                // Agrupar por banco para esta categoría
+                const byBank = {};
+                items.forEach(p => {
+                    if (!byBank[p.bank]) byBank[p.bank] = [];
+                    byBank[p.bank].push(p);
+                });
+
+                // Obtener el mejor de cada banco
+                const bestByBank = {};
+                for (const [bank, bankPromos] of Object.entries(byBank)) {
+                    bestByBank[bank] = bankPromos.sort((a, b) =>
+                        (parseInt(b.percentages?.[0]) || 0) - (parseInt(a.percentages?.[0]) || 0)
+                    )[0];
+                });
+
+                // Encontrar el ganador
+                const winner = Object.entries(bestByBank).sort((a, b) =>
+                    (parseInt(b[1].percentages?.[0]) || 0) - (parseInt(a[1].percentages?.[0]) || 0)
+                )[0];
+
+                html += `
+                    <div class="comparison-card">
+                        <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; color: var(--gray-900);">${category}</h3>
+                        <div class="comparison-items">
+                `;
+
+                // Mostrar cada banco
+                for (const [bank, promo] of Object.entries(bestByBank)) {
+                    const isWinner = winner[0] === bank;
+                    html += `
+                        <div class="bank-comparison ${isWinner ? 'winner' : ''}">
+                            <div class="comparison-header">
+                                <div class="bank-name-comp">${bank}</div>
+                                ${isWinner ? '<div class="winner-badge">🏆</div>' : ''}
+                            </div>
+                            <div class="percent-large">${parseInt(promo.percentages?.[0]) || 0}%</div>
+                            <div class="days-info">${promo.day_text || 'Todos los días'}</div>
+                            <div class="benefit-preview">${promo.benefit_summary.substring(0, 45)}...</div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            document.getElementById('comparison').innerHTML = html;
         }
 
         function renderCategories(promos) {
