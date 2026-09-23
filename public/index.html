@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ahorrador de Tarjetas PY - Tu comparador inteligente de beneficios</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            color: var(--gray-900);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+        }
+
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1.1rem; opacity: 0.9; }
+
+        /* ONBOARDING */
+        .onboarding {
+            background: white;
+            border-radius: 12px;
+            padding: 3rem;
+            max-width: 900px;
+            margin: 0 auto 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .onboarding h2 { font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--gray-900); }
+
+        .bank-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .bank-card {
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .bank-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .bank-card.selected {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .bank-card input[type="checkbox"] { display: none; }
+        .bank-card .bank-name { font-weight: 600; font-size: 1.05rem; }
+        .bank-card .bank-desc { font-size: 0.85rem; opacity: 0.7; margin-top: 0.5rem; }
+
+        .card-types {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card-type-group {
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .card-type-group.active { display: block; }
+        .card-type-group h3 { margin-bottom: 1rem; color: var(--primary); }
+
+        .type-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .type-btn {
+            padding: 0.75rem;
+            border: 2px solid var(--gray-200);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .type-btn:hover { border-color: var(--primary); }
+        .type-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .start-btn {
+            display: block;
+            margin-top: 2rem;
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* DASHBOARD */
+        .dashboard { display: none; }
+        .dashboard.active { display: block; }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--gray-200);
+            flex-wrap: wrap;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-600);
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        .card-header {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .card-bank {
+            display: inline-block;
+            background: var(--gray-100);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .card-benefit {
+            color: var(--success);
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin: 0.5rem 0;
+        }
+
+        .card-meta {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            margin-top: 0.75rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+
+        .calc-section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+            border: 2px solid var(--success);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--success);
+            margin: 1rem 0;
+        }
+
+        .summary-card {
+            background: white;
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 6px;
+        }
+
+        .summary-card h3 { color: var(--primary); margin-bottom: 0.5rem; }
+        .summary-card .amount { font-size: 1.75rem; font-weight: 700; }
+
+        .profile-section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 600px;
+        }
+
+        .profile-bank {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .profile-bank h4 { margin-bottom: 0.5rem; }
+        .profile-bank p { font-size: 0.9rem; color: var(--gray-600); }
+
+        .edit-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .edit-btn:hover { background: var(--primary-dark); }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 640px) {
+            header h1 { font-size: 1.75rem; }
+            .onboarding { padding: 1.5rem; }
+            .bank-selector {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            .bank-card { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 Ahorrador de Tarjetas PY</h1>
+            <p>Tu comparador inteligente de beneficios bancarios</p>
+        </header>
+
+        <!-- ONBOARDING -->
+        <div id="onboarding" class="onboarding">
+            <h2>Bienvenido 👋</h2>
+            <p style="margin-bottom: 2rem; color: var(--gray-600);">Primero, cuéntanos qué tarjetas tienes para recomendarte los mejores descuentos personalizados.</p>
+
+            <h3 style="margin-bottom: 1rem;">¿Qué bancos usás?</h3>
+            <div class="bank-selector" id="bankSelector"></div>
+
+            <div class="card-types" id="cardTypes"></div>
+
+            <button class="start-btn" id="startBtn" onclick="startDashboard()" disabled>
+                Comenzar →
+            </button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="dashboard">
+            <div style="margin-bottom: 1.5rem;">
+                <button class="edit-btn" onclick="resetProfile()">Cambiar tarjetas</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('today')">📅 Hoy</button>
+                <button class="tab-btn" onclick="switchTab('categories')">🏷️ Por categoría</button>
+                <button class="tab-btn" onclick="switchTab('calculator')">🧮 Calculadora</button>
+                <button class="tab-btn" onclick="switchTab('summary')">📊 Resumen</button>
+                <button class="tab-btn" onclick="switchTab('profile')">👤 Mi perfil</button>
+            </div>
+
+            <div id="today" class="tab-content active"></div>
+            <div id="categories" class="tab-content"></div>
+            <div id="calculator" class="tab-content">
+                <div class="calc-section">
+                    <h3>¿Cuánto vas a gastar?</h3>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="calcCategory" onchange="recalculate()">
+                            <option value="">Selecciona...</option>
+                            <option value="Supermercados">Supermercados</option>
+                            <option value="Combustible">Combustible</option>
+                            <option value="Gastronomía">Restaurantes</option>
+                            <option value="Farmacias">Farmacias</option>
+                            <option value="Hogar">Casa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Monto (Gs.)</label>
+                        <input type="number" id="calcAmount" placeholder="500000" oninput="recalculate()">
+                    </div>
+                    <div id="calcResult"></div>
+                </div>
+            </div>
+            <div id="summary" class="tab-content"></div>
+            <div id="profile" class="tab-content">
+                <div class="profile-section" id="profileContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Datos actualizados diariamente • Paraguay 🇵🇾
+    </footer>
+
+    <script>
+        const BANKS = {
+            'Itaú': {
+                levels: ['Personal Bank', 'Clásica', 'Oro', 'Signature', 'Infinite', 'AMEX Platinum'],
+                logo: '🏦'
+            },
+            'GNB': {
+                levels: ['Clásica', 'Premier'],
+                card_types: ['Visa', 'Mastercard'],
+                logo: '🏧'
+            },
+            'Atlas': {
+                levels: ['Clásica', 'Oro', 'Signature', 'Infinite'],
+                logo: '💳'
+            },
+            'ueno': {
+                levels: [1, 2, 3, 4, 5],
+                logo: '⚡'
+            },
+            'Continental': {
+                levels: ['Clásica', 'Oro', 'Platinum'],
+                logo: '🏪'
+            },
+            'Familiar': {
+                levels: ['Clásica', 'Oro', 'Platinum'],
+                logo: '👨‍👩‍👧‍👦'
+            }
+        };
+
+        let userProfile = JSON.parse(localStorage.getItem('userProfile') || 'null');
+        let allPromos = [];
+
+        async function init() {
+            await loadPromos();
+            renderOnboarding();
+        }
+
+        async function loadPromos() {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/giumontebruno/promo-bancos-py/main/public/promotions.json');
+                allPromos = await response.json();
+            } catch (e) {
+                console.error('Error loading promos:', e);
+                allPromos = [];
+            }
+        }
+
+        function renderOnboarding() {
+            if (userProfile) {
+                document.getElementById('onboarding').style.display = 'none';
+                document.getElementById('dashboard').classList.add('active');
+                renderDashboard();
+                return;
+            }
+
+            let html = '';
+            for (const [bank, config] of Object.entries(BANKS)) {
+                html += `
+                    <div class="bank-card" onclick="toggleBank('${bank}')">
+                        <input type="checkbox" id="bank-${bank}">
+                        <div class="bank-name">${config.logo} ${bank}</div>
+                        <div class="bank-desc">Selecciona</div>
+                    </div>
+                `;
+            }
+            document.getElementById('bankSelector').innerHTML = html;
+            renderCardTypes();
+        }
+
+        function toggleBank(bank) {
+            const card = event.currentTarget;
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            card.classList.toggle('selected');
+            renderCardTypes();
+            updateStartBtn();
+        }
+
+        function renderCardTypes() {
+            const selected = Array.from(document.querySelectorAll('.bank-card.selected')).map(c => {
+                return c.textContent.trim().split('\n')[1];
+            });
+
+            let html = '';
+            for (const bank of selected) {
+                const config = BANKS[bank];
+                if (!config) continue;
+
+                html += `
+                    <div class="card-type-group active">
+                        <h3>${bank}</h3>
+                        <div class="type-options">
+                `;
+
+                if (config.card_types) {
+                    config.card_types.forEach(type => {
+                        html += `<button class="type-btn" onclick="selectCardType('${bank}', '${type}')" data-bank="${bank}" data-type="${type}">${type}</button>`;
+                    });
+                } else {
+                    config.levels.forEach(level => {
+                        html += `<button class="type-btn" onclick="selectCardType('${bank}', '${level}')" data-bank="${bank}" data-level="${level}">${level}</button>`;
+                    });
+                }
+
+                html += '</div></div>';
+            }
+
+            document.getElementById('cardTypes').innerHTML = html;
+        }
+
+        function selectCardType(bank, type) {
+            const btn = event.currentTarget;
+            const sibs = btn.parentElement.querySelectorAll('.type-btn[data-bank="' + bank + '"]');
+            sibs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateStartBtn();
+        }
+
+        function updateStartBtn() {
+            const selected = document.querySelectorAll('.type-btn.active').length;
+            const banks = document.querySelectorAll('.bank-card.selected').length;
+            document.getElementById('startBtn').disabled = selected !== banks;
+        }
+
+        function startDashboard() {
+            const profile = {};
+            document.querySelectorAll('.type-btn.active').forEach(btn => {
+                const bank = btn.dataset.bank;
+                const level = btn.dataset.level || btn.dataset.type;
+                profile[bank] = level;
+            });
+
+            if (Object.keys(profile).length === 0) return;
+
+            userProfile = profile;
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            document.getElementById('onboarding').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            renderDashboard();
+        }
+
+        function resetProfile() {
+            localStorage.removeItem('userProfile');
+            userProfile = null;
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('onboarding').style.display = 'block';
+            renderOnboarding();
+        }
+
+        function renderDashboard() {
+            // Filtrar promos del usuario
+            const userPromos = allPromos.filter(p => Object.keys(userProfile).some(b => p.bank.includes(b)));
+
+            renderToday(userPromos);
+            renderCategories(userPromos);
+            renderSummary(userPromos);
+            renderProfileSection();
+        }
+
+        function getToday() {
+            const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+            return days[new Date().getDay()];
+        }
+
+        function renderToday(promos) {
+            const today = getToday();
+            const todayPromos = promos.filter(p => {
+                const dayText = (p.day_text || '').toLowerCase();
+                return dayText.includes(today);
+            }).sort((a, b) => (parseInt(b.percentages?.[0]) || 0) - (parseInt(a.percentages?.[0]) || 0));
+
+            let html = `<h2>🎯 Lo mejor para ${today.toUpperCase()}</h2><div style="margin-top: 1rem;">`;
+
+            if (todayPromos.length === 0) {
+                html += '<p style="color: var(--gray-600);">Sin promos especiales hoy</p>';
+            } else {
+                const byCategory = {};
+                todayPromos.forEach(p => {
+                    const cat = p.category || 'Otros';
+                    if (!byCategory[cat]) byCategory[cat] = p;
+                    else if ((parseInt(p.percentages?.[0]) || 0) > (parseInt(byCategory[cat].percentages?.[0]) || 0)) {
+                        byCategory[cat] = p;
+                    }
+                });
+
+                for (const [cat, promo] of Object.entries(byCategory)) {
+                    html += `
+                        <div class="card">
+                            <div class="card-header">
+                                <span>${cat}</span>
+                                <span class="badge">${promo.bank}</span>
+                            </div>
+                            <div class="card-benefit">${promo.benefit_summary}</div>
+                            <div class="card-meta">${promo.merchant_name}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            html += '</div>';
+            document.getElementById('today').innerHTML = html;
+        }
+
+        function renderCategories(promos) {
+            const categories = {};
+            promos.forEach(p => {
+                const cat = p.category || 'Otros';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(p);
+            });
+
+            let html = '';
+            for (const [cat, items] of Object.entries(categories)) {
+                html += `<h3 style="margin-top: 2rem; margin-bottom: 1rem;">${cat}</h3>`;
+                items.forEach(p => {
+                    html += `
+                        <div class="card">
+                            <span class="card-bank">${p.bank}</span>
+                            <div class="card-benefit">${p.benefit_summary}</div>
+                            <div class="card-meta">${p.merchant_name} • ${p.day_text}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('categories').innerHTML = html || '<p>Sin datos</p>';
+        }
+
+        function renderSummary(promos) {
+            const spending = {
+                'Supermercados': 8000000,
+                'Combustible': 5000000,
+                'Gastronomía': 6000000,
+                'Farmacias': 1000000,
+                'Hogar': 2000000
+            };
+
+            let total = 0;
+            let html = '<div class="grid">';
+
+            for (const [cat, amount] of Object.entries(spending)) {
+                const best = promos.filter(p => p.category === cat).sort((a, b) => {
+                    const bA = parseInt(a.percentages?.[0]) || 0;
+                    const bB = parseInt(b.percentages?.[0]) || 0;
+                    return bB - bA;
+                })[0];
+
+                const saving = best ? Math.round(amount * parseInt(best.percentages?.[0]) / 100) : 0;
+                total += saving;
+
+                html += `
+                    <div class="summary-card">
+                        <h3>${cat}</h3>
+                        <div class="amount">Gs. ${saving.toLocaleString('es-PY')}</div>
+                        <p style="font-size: 0.9rem; color: var(--gray-600);">${best?.bank || 'Sin promo'}</p>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="summary-card" style="border-left-color: var(--success); background: linear-gradient(135deg, #ecfdf5, #f0fdf4); grid-column: 1/-1;">
+                    <h3 style="color: var(--success);">TOTAL MENSUAL ESTIMADO</h3>
+                    <div class="amount" style="color: var(--success);">Gs. ${total.toLocaleString('es-PY')}</div>
+                    <p style="color: var(--gray-600);">≈ USD ${(total / 6100).toFixed(0)}</p>
+                </div>
+            `;
+
+            html += '</div>';
+            document.getElementById('summary').innerHTML = html;
+        }
+
+        function renderProfileSection() {
+            let html = '<h2>Tu perfil</h2>';
+            for (const [bank, level] of Object.entries(userProfile)) {
+                html += `
+                    <div class="profile-bank">
+                        <h4>${bank}</h4>
+                        <p>Tarjeta: ${level}</p>
+                    </div>
+                `;
+            }
+            document.getElementById('profileContent').innerHTML = html;
+        }
+
+        function recalculate() {
+            const cat = document.getElementById('calcCategory').value;
+            const amount = parseInt(document.getElementById('calcAmount').value) || 0;
+
+            if (!cat || amount === 0) {
+                document.getElementById('calcResult').innerHTML = '';
+                return;
+            }
+
+            const best = allPromos
+                .filter(p => p.category === cat && Object.keys(userProfile).some(b => p.bank.includes(b)))
+                .sort((a, b) => (parseInt(b.percentages?.[0]) || 0) - (parseInt(a.percentages?.[0]) || 0))[0];
+
+            if (!best) {
+                document.getElementById('calcResult').innerHTML = '<p style="color: var(--gray-600);">Sin promos en esta categoría</p>';
+                return;
+            }
+
+            const saving = Math.round(amount * parseInt(best.percentages?.[0]) / 100);
+
+            let html = `
+                <div class="result-box">
+                    <h3>Lo mejor para este monto:</h3>
+                    <span class="card-bank" style="margin-top: 1rem;">${best.bank}</span>
+                    <div class="card-benefit" style="margin-top: 0.5rem;">${best.benefit_summary}</div>
+                    <div class="result-amount">Gs. ${saving.toLocaleString('es-PY')}</div>
+                    <p style="color: var(--gray-600);">de ahorro</p>
+                </div>
+            `;
+
+            document.getElementById('calcResult').innerHTML = html;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        init();
+    </script>
+</body>
+</html>
