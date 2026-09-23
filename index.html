@@ -1024,21 +1024,107 @@
                 categories[cat].push(p);
             });
 
-            let html = '';
-            for (const [cat, items] of Object.entries(categories)) {
-                html += `<h3 style="margin-top: 2rem; margin-bottom: 1rem;">${cat}</h3>`;
-                items.forEach(p => {
+            const categoryList = Object.keys(categories).sort();
+
+            let html = `
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="margin-bottom: 1.5rem;">🏷️ Todos los descuentos por categoría</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 2rem;">
+            `;
+
+            categoryList.forEach((cat, idx) => {
+                html += `
+                    <button class="category-btn ${idx === 0 ? 'active' : ''}" onclick="selectCategoryDetail('${cat}', event)" style="padding: 0.75rem 1rem; border-radius: 12px; border: 2px solid var(--gray-200); background: white; cursor: pointer; font-weight: 500; transition: all 0.2s;">
+                        ${cat}
+                    </button>
+                `;
+            });
+
+            html += `
+                    </div>
+                    <div id="categoryDetail"></div>
+                </div>
+            `;
+
+            document.getElementById('categories').innerHTML = html;
+            if (categoryList.length > 0) {
+                selectCategoryDetail(categoryList[0]);
+            }
+        }
+
+        function selectCategoryDetail(category, event) {
+            if (event) {
+                const buttons = document.querySelectorAll('.category-btn');
+                buttons.forEach(b => b.classList.remove('active'));
+                event.target.classList.add('active');
+                event.target.style.borderColor = 'var(--primary)';
+                event.target.style.backgroundColor = 'rgba(0, 122, 255, 0.08)';
+            }
+
+            // Obtener datos del usuario (desde userProfile)
+            const userPromos = allPromos.filter(p => Object.keys(userProfile).some(b => p.bank.includes(b)));
+            const items = userPromos.filter(p => p.category === category);
+
+            if (items.length === 0) {
+                document.getElementById('categoryDetail').innerHTML = '<p style="color: var(--gray-600);">Sin descuentos en esta categoría</p>';
+                return;
+            }
+
+            // Agrupar por banco
+            const byBank = {};
+            items.forEach(p => {
+                if (!byBank[p.bank]) byBank[p.bank] = [];
+                byBank[p.bank].push(p);
+            });
+
+            let html = `
+                <div style="background: white; border-radius: 16px; padding: 2rem; box-shadow: var(--shadow-sm);">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.3rem; color: var(--gray-900);">${category}</h3>
+            `;
+
+            for (const [bank, bankItems] of Object.entries(byBank)) {
+                // Ordenar por porcentaje (mayor primero)
+                const sorted = bankItems.sort((a, b) => (parseInt(b.percentages?.[0]) || 0) - (parseInt(a.percentages?.[0]) || 0));
+
+                html += `
+                    <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--gray-200);">
+                        <h4 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            ${bank}
+                        </h4>
+                        <div style="display: grid; gap: 1rem;">
+                `;
+
+                sorted.forEach((p, idx) => {
+                    const percent = parseInt(p.percentages?.[0]) || 0;
                     html += `
-                        <div class="card">
-                            <span class="card-bank">${p.bank}</span>
-                            <div class="card-benefit">${p.benefit_summary}</div>
-                            <div class="card-meta">${p.merchant_name} • ${p.day_text}</div>
+                        <div style="background: var(--gray-100); border-radius: 12px; padding: 1.25rem; border-left: 4px solid var(--primary);">
+                            <div style="display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 2rem; font-weight: 700; color: var(--success);">${percent}%</div>
+                                    <div style="font-size: 0.8rem; color: var(--gray-600);">descuento</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--gray-900);">${p.merchant_name || 'Sin especificar'}</div>
+                                    <div style="font-size: 0.95rem; color: var(--gray-600); margin-bottom: 0.5rem;">${p.benefit_summary}</div>
+                                    <div style="font-size: 0.85rem; color: var(--primary); font-weight: 500;">📅 ${p.day_text || 'Todos los días'}</div>
+                                    ${p.notes ? `<div style="font-size: 0.8rem; color: var(--gray-600); margin-top: 0.5rem; font-style: italic;">📋 ${p.notes}</div>` : ''}
+                                </div>
+                            </div>
                         </div>
                     `;
                 });
+
+                html += `
+                        </div>
+                    </div>
+                `;
             }
 
-            document.getElementById('categories').innerHTML = html || '<p>Sin datos</p>';
+            html += `
+                </div>
+            `;
+
+            document.getElementById('categoryDetail').innerHTML = html;
         }
 
         function renderSummary(promos) {
