@@ -430,31 +430,29 @@
 
     <script>
         const BANKS = {
-            'Itaú': {
-                levels: ['Personal Bank', 'Clásica', 'Oro', 'Signature', 'Infinite', 'AMEX Platinum'],
-                logo: '🏦'
-            },
-            'GNB': {
-                levels: ['Clásica', 'Premier'],
-                card_types: ['Visa', 'Mastercard'],
-                logo: '🏧'
-            },
-            'Atlas': {
-                levels: ['Clásica', 'Oro', 'Signature', 'Infinite'],
-                logo: '💳'
-            },
-            'ueno': {
-                levels: [1, 2, 3, 4, 5],
-                logo: '⚡'
-            },
-            'Continental': {
-                levels: ['Clásica', 'Oro', 'Platinum'],
-                logo: '🏪'
-            },
-            'Familiar': {
-                levels: ['Clásica', 'Oro', 'Platinum'],
-                logo: '👨‍👩‍👧‍👦'
-            }
+            'Itaú': { levels: ['Personal Bank', 'Clásica', 'Oro', 'Signature', 'Infinite', 'AMEX Platinum'], logo: '🏦' },
+            'GNB': { levels: ['Clásica', 'Premier'], card_types: ['Visa', 'Mastercard'], logo: '🏧' },
+            'Atlas': { levels: ['Clásica', 'Oro', 'Signature', 'Infinite'], logo: '💳' },
+            'ueno bank': { levels: [1, 2, 3, 4, 5], logo: '⚡' },
+            'Continental': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '🏪' },
+            'Familiar': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '👨‍👩‍👧‍👦' },
+            'Sudameris': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '🏛️' },
+            'BNF': { levels: ['Clásica', 'Oro'], logo: '🌾' },
+            'Coop. Universitaria': { levels: ['Clásica'], logo: '🎓' },
+            'Basa': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '💼' },
+            'Banco Río': { levels: ['Clásica', 'Oro'], logo: '🏞️' },
+            'Bancop': { levels: ['Clásica', 'Oro'], logo: '🤝' },
+            'Interfisa': { levels: ['Clásica', 'Oro'], logo: '🔗' },
+            'Solar': { levels: ['Clásica', 'Oro'], logo: '☀️' },
+            'Zeta Banco': { levels: ['Clásica'], logo: '⚙️' },
+            'Paraguayo Japonesa': { levels: ['Clásica', 'Premium'], logo: '🎌' },
+            'Finlatina': { levels: ['Clásica', 'Oro'], logo: '🌎' },
+            'Tu Financiera': { levels: ['Clásica'], logo: '💰' },
+            'Cefisa': { levels: ['Clásica'], logo: '📋' },
+            'Creditotal': { levels: ['Clásica'], logo: '✅' },
+            'Credicard': { levels: ['Clásica'], logo: '🎫' },
+            'Cabal': { levels: ['Clásica'], logo: '🔵' },
+            'Panal': { levels: ['Clásica'], logo: '🍯' }
         };
 
         let userProfile = JSON.parse(localStorage.getItem('userProfile') || 'null');
@@ -486,7 +484,7 @@
             let html = '';
             for (const [bank, config] of Object.entries(BANKS)) {
                 html += `
-                    <div class="bank-card" onclick="toggleBank('${bank}')">
+                    <div class="bank-card" onclick="toggleBank('${bank}')" data-bank="${bank}">
                         <input type="checkbox" id="bank-${bank}">
                         <div class="bank-name">${config.logo} ${bank}</div>
                         <div class="bank-desc">Selecciona</div>
@@ -508,7 +506,7 @@
 
         function renderCardTypes() {
             const selected = Array.from(document.querySelectorAll('.bank-card.selected')).map(c => {
-                return c.textContent.trim().split('\n')[1];
+                return c.dataset.bank;
             });
 
             let html = '';
