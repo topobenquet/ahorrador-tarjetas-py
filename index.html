@@ -84,6 +84,8 @@
         }
 
         .bank-card input[type="checkbox"] { display: none; }
+        .bank-card .bank-logo-svg { width: 70px; height: 70px; margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center; }
+        .bank-card .bank-logo-svg svg { width: 100%; height: 100%; }
         .bank-card .bank-name { font-weight: 600; font-size: 1.05rem; }
         .bank-card .bank-desc { font-size: 0.85rem; opacity: 0.7; margin-top: 0.5rem; }
 
@@ -429,30 +431,56 @@
     </footer>
 
     <script>
+        const BANK_LOGOS = {
+            'Itaú': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#ff6600" width="100" height="100" rx="8"/><text x="50" y="65" font-size="50" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">Ⓘ</text></svg>',
+            'GNB': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#003d82" width="100" height="100" rx="8"/><text x="50" y="65" font-size="45" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">GNB</text></svg>',
+            'Atlas': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#d32f2f" width="100" height="100" rx="8"/><text x="50" y="65" font-size="40" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">ATL</text></svg>',
+            'ueno bank': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#f4a300" width="100" height="100" rx="8"/><text x="50" y="65" font-size="45" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">⚡</text></svg>',
+            'Continental': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#1e40af" width="100" height="100" rx="8"/><text x="50" y="65" font-size="35" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">CONT</text></svg>',
+            'Familiar': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#7c3aed" width="100" height="100" rx="8"/><text x="50" y="65" font-size="35" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">FAM</text></svg>',
+            'Sudameris': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#059669" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">SUDA</text></svg>',
+            'BNF': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#92400e" width="100" height="100" rx="8"/><text x="50" y="65" font-size="40" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">BNF</text></svg>',
+            'Coop. Universitaria': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#6366f1" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">COOP</text></svg>',
+            'Basa': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#dc2626" width="100" height="100" rx="8"/><text x="50" y="65" font-size="40" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">BAS</text></svg>',
+            'Banco Río': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#0891b2" width="100" height="100" rx="8"/><text x="50" y="65" font-size="35" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">RÍO</text></svg>',
+            'Bancop': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#16a34a" width="100" height="100" rx="8"/><text x="50" y="65" font-size="35" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">BCP</text></svg>',
+            'Interfisa': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#2563eb" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">INTF</text></svg>',
+            'Solar': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#ea580c" width="100" height="100" rx="8"/><text x="50" y="65" font-size="40" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">☀️</text></svg>',
+            'Zeta Banco': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#64748b" width="100" height="100" rx="8"/><text x="50" y="65" font-size="40" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">Z</text></svg>',
+            'Paraguayo Japonesa': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#e11d48" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">PJ</text></svg>',
+            'Finlatina': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#0ea5e9" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">FIN</text></svg>',
+            'Tu Financiera': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#f59e0b" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">TUF</text></svg>',
+            'Cefisa': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#8b5cf6" width="100" height="100" rx="8"/><text x="50" y="65" font-size="35" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">CEF</text></svg>',
+            'Creditotal': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#10b981" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">CRED</text></svg>',
+            'Credicard': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#3b82f6" width="100" height="100" rx="8"/><text x="50" y="65" font-size="30" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">CARD</text></svg>',
+            'Cabal': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50" fill="#0066cc"/><text x="50" y="65" font-size="35" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">CAB</text></svg>',
+            'Panal': '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect fill="#f97316" width="100" height="100" rx="8"/><text x="50" y="65" font-size="35" font-weight="bold" fill="white" text-anchor="middle" font-family="Arial">🍯</text></svg>'
+        };
+
         const BANKS = {
-            'Itaú': { levels: ['Personal Bank', 'Clásica', 'Oro', 'Signature', 'Infinite', 'AMEX Platinum'], logo: '🏦' },
-            'GNB': { levels: ['Clásica', 'Premier'], card_types: ['Visa', 'Mastercard'], logo: '🏧' },
-            'Atlas': { levels: ['Clásica', 'Oro', 'Signature', 'Infinite'], logo: '💳' },
-            'ueno bank': { levels: [1, 2, 3, 4, 5], logo: '⚡' },
-            'Continental': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '🏪' },
-            'Familiar': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '👨‍👩‍👧‍👦' },
-            'Sudameris': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '🏛️' },
-            'BNF': { levels: ['Clásica', 'Oro'], logo: '🌾' },
-            'Coop. Universitaria': { levels: ['Clásica'], logo: '🎓' },
-            'Basa': { levels: ['Clásica', 'Oro', 'Platinum'], logo: '💼' },
-            'Banco Río': { levels: ['Clásica', 'Oro'], logo: '🏞️' },
-            'Bancop': { levels: ['Clásica', 'Oro'], logo: '🤝' },
-            'Interfisa': { levels: ['Clásica', 'Oro'], logo: '🔗' },
-            'Solar': { levels: ['Clásica', 'Oro'], logo: '☀️' },
-            'Zeta Banco': { levels: ['Clásica'], logo: '⚙️' },
-            'Paraguayo Japonesa': { levels: ['Clásica', 'Premium'], logo: '🎌' },
-            'Finlatina': { levels: ['Clásica', 'Oro'], logo: '🌎' },
-            'Tu Financiera': { levels: ['Clásica'], logo: '💰' },
-            'Cefisa': { levels: ['Clásica'], logo: '📋' },
-            'Creditotal': { levels: ['Clásica'], logo: '✅' },
-            'Credicard': { levels: ['Clásica'], logo: '🎫' },
-            'Cabal': { levels: ['Clásica'], logo: '🔵' },
-            'Panal': { levels: ['Clásica'], logo: '🍯' }
+            'Itaú': { levels: ['Personal Bank', 'Clásica', 'Oro', 'Signature', 'Infinite', 'AMEX Platinum'] },
+            'GNB': { levels: ['Clásica', 'Premier'], card_types: ['Visa', 'Mastercard'] },
+            'Atlas': { levels: ['Clásica', 'Oro', 'Signature', 'Infinite'] },
+            'ueno bank': { levels: [1, 2, 3, 4, 5] },
+            'Continental': { levels: ['Clásica', 'Oro', 'Platinum'] },
+            'Familiar': { levels: ['Clásica', 'Oro', 'Platinum'] },
+            'Sudameris': { levels: ['Clásica', 'Oro', 'Platinum'] },
+            'BNF': { levels: ['Clásica', 'Oro'] },
+            'Coop. Universitaria': { levels: ['Clásica'] },
+            'Basa': { levels: ['Clásica', 'Oro', 'Platinum'] },
+            'Banco Río': { levels: ['Clásica', 'Oro'] },
+            'Bancop': { levels: ['Clásica', 'Oro'] },
+            'Interfisa': { levels: ['Clásica', 'Oro'] },
+            'Solar': { levels: ['Clásica', 'Oro'] },
+            'Zeta Banco': { levels: ['Clásica'] },
+            'Paraguayo Japonesa': { levels: ['Clásica', 'Premium'] },
+            'Finlatina': { levels: ['Clásica', 'Oro'] },
+            'Tu Financiera': { levels: ['Clásica'] },
+            'Cefisa': { levels: ['Clásica'] },
+            'Creditotal': { levels: ['Clásica'] },
+            'Credicard': { levels: ['Clásica'] },
+            'Cabal': { levels: ['Clásica'] },
+            'Panal': { levels: ['Clásica'] }
         };
 
         let userProfile = JSON.parse(localStorage.getItem('userProfile') || 'null');
@@ -486,7 +514,8 @@
                 html += `
                     <div class="bank-card" onclick="toggleBank('${bank}')" data-bank="${bank}">
                         <input type="checkbox" id="bank-${bank}">
-                        <div class="bank-name">${config.logo} ${bank}</div>
+                        <div class="bank-logo-svg">${BANK_LOGOS[bank]}</div>
+                        <div class="bank-name">${bank}</div>
                         <div class="bank-desc">Selecciona</div>
                     </div>
                 `;
