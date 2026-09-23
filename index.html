@@ -977,7 +977,7 @@
                     bestByBank[bank] = bankPromos.sort((a, b) =>
                         (parseInt(b.percentages?.[0]) || 0) - (parseInt(a.percentages?.[0]) || 0)
                     )[0];
-                });
+                }
 
                 // Encontrar el ganador
                 const winner = Object.entries(bestByBank).sort((a, b) =>
